@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in/Check-out</title>
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(sendData, showError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function sendData(position) {
+            let name = document.getElementById("name").value;
+            let status = document.querySelector('input[name="status"]:checked')?.value;
+            if (!name || !status) {
+                alert("Please enter your name and select a status.");
+                return;
+            }
+
+            let latitude = position.coords.latitude;
+            let longitude = position.coords.longitude;
+
+            let data = { name, status, latitude, longitude };
+
+            fetch("https://script.google.com/macros/s/AKfycbyHe4krwYS3yFWw11fJfuUakhUML6iRnf2nyrcHDs5xot0WoklXYYZzXtrgIHlP_cYK/exec", {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.text())
+            .then(data => alert("Location saved successfully!"))
+            .catch(error => console.error("Error:", error));
+        }
+
+        function showError(error) {
+            alert("Error fetching location. Please enable location access.");
+        }
+    </script>
+</head>
+<body>
+    <h2>Check-in/Check-out</h2>
+
+    <!-- Name Input -->
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" title="Enter your full name" placeholder="Enter your name" required><br><br>
+
+    <!-- Check-in / Check-out Selection -->
+    <fieldset>
+        <legend>Status:</legend>
+        <input type="radio" id="checkin" name="status" value="Check-in" required>
+        <label for="checkin">Check-in</label>
+
+        <input type="radio" id="checkout" name="status" value="Check-out" required>
+        <label for="checkout">Check-out</label>
+    </fieldset>
+    <br>
+
+    <!-- Submit Button -->
+    <button onclick="getLocation()">Submit</button>
+</body>
+</html>
