@@ -5,37 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-in/Check-out</title>
     <script>
-        function getLocation() {
+        // Function to get location and send data to Google Sheets via Google Apps Script
+        function getLocationAndSubmit() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(sendData, showError);
+                navigator.geolocation.getCurrentPosition(submitForm, showError);
             } else {
                 alert("Geolocation is not supported by this browser.");
             }
         }
 
-        function sendData(position) {
-            let name = document.getElementById("name").value;
-            let status = document.querySelector('input[name="status"]:checked')?.value;
+        // Function to submit the form data along with geolocation
+        function submitForm(position) {
+            var name = document.getElementById("name").value;
+            var status = document.querySelector('input[name="status"]:checked')?.value;
+            
             if (!name || !status) {
                 alert("Please enter your name and select a status.");
                 return;
             }
 
-            let latitude = position.coords.latitude;
-            let longitude = position.coords.longitude;
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
 
-            let data = { name, status, latitude, longitude };
+            var data = { name, status, latitude, longitude };
 
-            fetch("https://script.google.com/macros/s/AKfycbw5ppWos21C86X-fbvP1ucvB4eZ6ccVqIbhu2ULS6ZTKSIAdSOMoEHBMZKT6ktRK7c6/exec", {  // Replace this with the actual URL
+            // Send data to Google Apps Script via POST request
+            fetch("https://script.google.com/macros/s/AKfycby2pAOzPipJOYqxQ0guXpcf5YVTjWqqDZDB-qHunahEU7eZtLGzSJfBI60pg8wqlk78/exec", {  // Replace with your script URL
                 method: "POST",
                 body: JSON.stringify(data),
                 headers: { "Content-Type": "application/json" }
             })
             .then(response => response.text())
-            .then(data => alert("Location saved successfully!"))
+            .then(data => {
+                alert("Check-in/Check-out successful!");
+            })
             .catch(error => console.error("Error:", error));
         }
 
+        // Error handling if geolocation fails
         function showError(error) {
             alert("Error fetching location. Please enable location access.");
         }
@@ -44,11 +51,9 @@
 <body>
     <h2>Check-in/Check-out</h2>
 
-    <!-- Name Input -->
     <label for="name">Name:</label>
-    <input type="text" id="name" name="name" title="Enter your full name" placeholder="Enter your name" required><br><br>
+    <input type="text" id="name" name="name" placeholder="Enter your name" required><br><br>
 
-    <!-- Check-in / Check-out Selection -->
     <fieldset>
         <legend>Status:</legend>
         <input type="radio" id="checkin" name="status" value="Check-in" required>
@@ -59,7 +64,6 @@
     </fieldset>
     <br>
 
-    <!-- Submit Button -->
-    <button onclick="getLocation()">Submit</button>
+    <button onclick="getLocationAndSubmit()">Submit</button>
 </body>
 </html>
